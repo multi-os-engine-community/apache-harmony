@@ -25,10 +25,9 @@
  */
 package org.apache.harmony.jpda.tests.jdwp.ArrayReference;
 
-import java.io.UnsupportedEncodingException;
-
 import org.apache.harmony.jpda.tests.framework.jdwp.ArrayRegion;
 import org.apache.harmony.jpda.tests.framework.jdwp.CommandPacket;
+import org.apache.harmony.jpda.tests.framework.jdwp.Field;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPCommands;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPConstants;
 import org.apache.harmony.jpda.tests.framework.jdwp.ReplyPacket;
@@ -48,7 +47,7 @@ public class GetValuesTest extends JDWPArrayReferenceTestCase {
      * <BR>Receives fields with ReferenceType.fields command,
      * receives values with ArrayReference.GetValues then checks them.
      */
-    public void testGetValues001() throws UnsupportedEncodingException {
+    public void testGetValues001() {
         logWriter.println("==> GetValuesTest.testGetValues001 started...");
         synchronizer.receiveMessage(JPDADebuggeeSynchronizer.SGNL_READY);
 
@@ -58,19 +57,11 @@ public class GetValuesTest extends JDWPArrayReferenceTestCase {
         long classID = getClassIDBySignature(debuggeeSig);
 
         // obtain fields
-        CommandPacket packet = new CommandPacket(
-                JDWPCommands.ReferenceTypeCommandSet.CommandSetID,
-                JDWPCommands.ReferenceTypeCommandSet.FieldsCommand);
-        packet.setNextValueAsReferenceTypeID(classID);
-        ReplyPacket reply = debuggeeWrapper.vmMirror.performCommand(packet);
-        checkReplyPacket(reply, "ReferenceType::Fields command");
+        Field[] fields = debuggeeWrapper.vmMirror.getFieldsInfo(classID);
 
-        int declared = reply.getNextValueAsInt();
-        for (int i = 0; i < declared; i++) {
-            long fieldID = reply.getNextValueAsFieldID();
-            String name = reply.getNextValueAsString();
-            reply.getNextValueAsString();
-            reply.getNextValueAsInt();
+        for (Field fieldInfo : fields) {
+            long fieldID = fieldInfo.getFieldID();
+            String name = fieldInfo.getName();
 
             if (name.equals("threadArray")) {
                 logWriter.println
@@ -135,8 +126,7 @@ public class GetValuesTest extends JDWPArrayReferenceTestCase {
     }
 
     private void checkArrayValues(long classID, long fieldID, int error, int length,
-            int checksNumber, byte expectedArrayTag, byte expectedElementTag, boolean checkValues)
-    throws UnsupportedEncodingException {
+            int checksNumber, byte expectedArrayTag, byte expectedElementTag, boolean checkValues) {
         CommandPacket packet = new CommandPacket(
                 JDWPCommands.ReferenceTypeCommandSet.CommandSetID,
                 JDWPCommands.ReferenceTypeCommandSet.GetValuesCommand);
@@ -186,8 +176,7 @@ public class GetValuesTest extends JDWPArrayReferenceTestCase {
     }
 
     private void checkArrayRegion(long arrayID, int error, int firstIndex, int length,
-            byte expectedArrayTag, byte expectedElementTag, boolean checkValues)
-        throws UnsupportedEncodingException {
+            byte expectedArrayTag, byte expectedElementTag, boolean checkValues) {
 
         CommandPacket packet = new CommandPacket(
                 JDWPCommands.ArrayReferenceCommandSet.CommandSetID,

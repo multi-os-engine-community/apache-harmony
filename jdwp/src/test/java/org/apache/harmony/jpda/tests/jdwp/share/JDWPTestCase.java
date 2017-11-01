@@ -28,6 +28,7 @@ package org.apache.harmony.jpda.tests.jdwp.share;
 import org.apache.harmony.jpda.tests.framework.TestErrorException;
 import org.apache.harmony.jpda.tests.framework.jdwp.CommandPacket;
 import org.apache.harmony.jpda.tests.framework.jdwp.EventPacket;
+import org.apache.harmony.jpda.tests.framework.jdwp.Field;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPCommands;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPConstants;
 import org.apache.harmony.jpda.tests.framework.jdwp.Packet;
@@ -52,6 +53,7 @@ public abstract class JDWPTestCase extends JDWPRawTestCase {
      * Overrides inherited method to launch one debuggee VM, establish JDWP
      * connection, and wait for VM_START event.
      */
+    @Override
     protected void internalSetUp() throws Exception {
         super.internalSetUp();
 
@@ -112,6 +114,7 @@ public abstract class JDWPTestCase extends JDWPRawTestCase {
      * Overrides inherited method to stop started debuggee VM and close all
      * connections.
      */
+    @Override
     protected void internalTearDown() {
         if (debuggeeWrapper != null) {
             debuggeeWrapper.stop();
@@ -203,23 +206,7 @@ public abstract class JDWPTestCase extends JDWPRawTestCase {
      * @return method ID
      */
     protected long getMethodID(long classID, String methodName) {
-        CommandPacket command = new CommandPacket(
-                JDWPCommands.ReferenceTypeCommandSet.CommandSetID,
-                JDWPCommands.ReferenceTypeCommandSet.MethodsCommand);
-        command.setNextValueAsClassID(classID);
-        ReplyPacket reply = debuggeeWrapper.vmMirror.performCommand(command);
-        checkReplyPacket(reply, "ReferenceType::Methods command");
-        int methods = reply.getNextValueAsInt();
-        for (int i = 0; i < methods; i++) {
-            long methodID = reply.getNextValueAsMethodID();
-            String name = reply.getNextValueAsString(); // method name
-            reply.getNextValueAsString(); // method signature
-            reply.getNextValueAsInt(); // method modifiers
-            if (name.equals(methodName)) {
-                return methodID;
-            }
-        }
-        return -1;
+        return debuggeeWrapper.vmMirror.getMethodID(classID, methodName);
     }
 
     /**
@@ -234,23 +221,7 @@ public abstract class JDWPTestCase extends JDWPRawTestCase {
      * @return method ID
      */
     protected long getMethodID(long classID, String methodName, String methodSignature) {
-        CommandPacket command = new CommandPacket(
-                JDWPCommands.ReferenceTypeCommandSet.CommandSetID,
-                JDWPCommands.ReferenceTypeCommandSet.MethodsCommand);
-        command.setNextValueAsClassID(classID);
-        ReplyPacket reply = debuggeeWrapper.vmMirror.performCommand(command);
-        checkReplyPacket(reply, "ReferenceType::Methods command");
-        int methods = reply.getNextValueAsInt();
-        for (int i = 0; i < methods; i++) {
-            long methodID = reply.getNextValueAsMethodID();
-            String name = reply.getNextValueAsString(); // method name
-            String signature = reply.getNextValueAsString();
-            reply.getNextValueAsInt(); // method modifiers
-            if (name.equals(methodName) && signature.equals(methodSignature)) {
-                return methodID;
-            }
-        }
-        return -1;
+        return debuggeeWrapper.vmMirror.getMethodID(classID, methodName, methodSignature);
     }
 
     /**
@@ -282,23 +253,7 @@ public abstract class JDWPTestCase extends JDWPRawTestCase {
      * @return String
      */
     protected String getMethodName(long classID, long methodID) {
-        CommandPacket packet = new CommandPacket(
-                JDWPCommands.ReferenceTypeCommandSet.CommandSetID,
-                JDWPCommands.ReferenceTypeCommandSet.MethodsCommand);
-        packet.setNextValueAsClassID(classID);
-        ReplyPacket reply = debuggeeWrapper.vmMirror.performCommand(packet);
-        checkReplyPacket(reply, "ReferenceType::Methods command");
-        int methods = reply.getNextValueAsInt();
-        for (int i = 0; i < methods; i++) {
-            long mid = reply.getNextValueAsMethodID();
-            String name = reply.getNextValueAsString();
-            reply.getNextValueAsString();
-            reply.getNextValueAsInt();
-            if (mid == methodID) {
-                return name;
-            }
-        }
-        return "unknown";
+        return debuggeeWrapper.vmMirror.getMethodName(classID, methodID);
     }
 
     /**
@@ -472,19 +427,8 @@ public abstract class JDWPTestCase extends JDWPRawTestCase {
         boolean checkedFieldFound[] = new boolean[checkedFieldNames.length];
         long checkedFieldIDs[] = new long[checkedFieldNames.length];
 
-        logWriter
-                .println("=> Send ReferenceType::Fields command and get field ID(s)");
-
-        CommandPacket fieldsCommand = new CommandPacket(
-                JDWPCommands.ReferenceTypeCommandSet.CommandSetID,
-                JDWPCommands.ReferenceTypeCommandSet.FieldsCommand);
-        fieldsCommand.setNextValueAsReferenceTypeID(refTypeID);
-        ReplyPacket fieldsReply = debuggeeWrapper.vmMirror
-                .performCommand(fieldsCommand);
-        fieldsCommand = null;
-        checkReplyPacket(fieldsReply, "ReferenceType::Fields command");
-
-        int returnedFieldsNumber = fieldsReply.getNextValueAsInt();
+        Field[] fields = debuggeeWrapper.vmMirror.getFieldsInfo(refTypeID);
+        int returnedFieldsNumber = fields.length;
         logWriter
                 .println("=> Returned fields number = " + returnedFieldsNumber);
 
@@ -496,11 +440,11 @@ public abstract class JDWPTestCase extends JDWPRawTestCase {
         int nameMissing = 0;
         String fieldNameMissing = null; // <= collects all missed fields
 
-        for (int i = 0; i < returnedFieldsNumber; i++) {
-            long returnedFieldID = fieldsReply.getNextValueAsFieldID();
-            String returnedFieldName = fieldsReply.getNextValueAsString();
-            String returnedFieldSignature = fieldsReply.getNextValueAsString();
-            int returnedFieldModifiers = fieldsReply.getNextValueAsInt();
+        for (Field fieldInfo : fields) {
+            long returnedFieldID = fieldInfo.getFieldID();
+            String returnedFieldName = fieldInfo.getName();
+            String returnedFieldSignature = fieldInfo.getSignature();
+            int returnedFieldModifiers = fieldInfo.getModBits();
             logWriter.println("");
             logWriter.println("=> Field ID: " + returnedFieldID);
             logWriter.println("=> Field name: " + returnedFieldName);
@@ -590,7 +534,6 @@ public abstract class JDWPTestCase extends JDWPRawTestCase {
                     .println("=> Expected fields were found and field IDs were got");
         }
 
-        assertAllDataRead(fieldsReply);
         return checkedFieldIDs;
     }
 

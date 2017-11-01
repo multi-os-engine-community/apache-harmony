@@ -25,6 +25,7 @@
 package org.apache.harmony.jpda.tests.jdwp.StackFrame;
 
 import org.apache.harmony.jpda.tests.framework.jdwp.CommandPacket;
+import org.apache.harmony.jpda.tests.framework.jdwp.Frame;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPCommands;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPCommands.StackFrameCommandSet;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPConstants;
@@ -203,9 +204,9 @@ public class SetValuesTest extends JDWPStackTraceBaseTest {
 
         packet.setNextValueAsInt(varTags.length-2);
         packet.setNextValueAsInt(varInfoByName("boolLocalVariable").getSlot());
-        packet.setNextValueAsValue(new Value(false));
+        packet.setNextValueAsValue(Value.createBoolean(false));
         packet.setNextValueAsInt(varInfoByName("intLocalVariable").getSlot());
-        packet.setNextValueAsValue(new Value((int)12345));
+        packet.setNextValueAsValue(Value.createInt(12345));
 
         ReplyPacket reply = debuggeeWrapper.vmMirror.performCommand(packet);
         checkReplyPacket(reply, "StackFrame::SetValues command");
@@ -322,7 +323,7 @@ public class SetValuesTest extends JDWPStackTraceBaseTest {
         assertTrue(logWriter.getErrorMessage(), success);
     }
 
-    private VarInfo varInfoByName(String name) {
+    private Frame.Variable varInfoByName(String name) {
       for (int i = 0; i < varInfos.length; ++i) {
         if (varInfos[i].getName().equals(name)) {
           return varInfos[i];

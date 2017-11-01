@@ -40,6 +40,7 @@ import org.apache.harmony.jpda.tests.share.JPDADebuggeeSynchronizer;
  */
 public class NewInstanceTest extends JDWPSyncTestCase {
 
+    @Override
     protected String getDebuggeeClassName() {
         return "org.apache.harmony.jpda.tests.jdwp.share.debuggee.InvokeMethodDebuggee";
     }
@@ -84,28 +85,7 @@ public class NewInstanceTest extends JDWPSyncTestCase {
                 , JDWPConstants.TypeTag.getName(refTypeTag));
 
         // Get methodID
-        packet = new CommandPacket(
-                JDWPCommands.ReferenceTypeCommandSet.CommandSetID,
-                JDWPCommands.ReferenceTypeCommandSet.MethodsCommand);
-        packet.setNextValueAsClassID(typeID);
-        reply = debuggeeWrapper.vmMirror.performCommand(packet);
-        checkReplyPacket(reply, "ReferenceType::Methods command");
-
-        int declared = reply.getNextValueAsInt();
-        logWriter.println(" ReferenceType.Methods: declared=" + declared);
-        long targetMethodID = 0;
-        for (int i = 0; i < declared; i++) {
-            long methodID = reply.getNextValueAsMethodID();
-            String name = reply.getNextValueAsString();
-            String signature = reply.getNextValueAsString();
-            int modBits = reply.getNextValueAsInt();
-            logWriter.println("  methodID=" + methodID + "; name=" + name
-                    + ";  signature=" + signature + "; modBits=" + modBits);
-            if (name.equals("<init>")) {
-                targetMethodID = methodID;
-            }
-        }
-        assertAllDataRead(reply);
+        long targetMethodID = getMethodID(typeID, "<init>");
 
         // Set EventRequest
         packet = new CommandPacket(
@@ -167,7 +147,7 @@ public class NewInstanceTest extends JDWPSyncTestCase {
         packet.setNextValueAsThreadID(targetThreadID);
         packet.setNextValueAsMethodID(targetMethodID);
         packet.setNextValueAsInt(1);
-        packet.setNextValueAsValue(new Value(false));
+        packet.setNextValueAsValue(Value.createBoolean(false));
         packet.setNextValueAsInt(0);
         logWriter.println(" Send ClassType.NewInstance (without Exception)");
         reply = debuggeeWrapper.vmMirror.performCommand(packet);
@@ -218,7 +198,7 @@ public class NewInstanceTest extends JDWPSyncTestCase {
         packet.setNextValueAsThreadID(targetThreadID);
         packet.setNextValueAsMethodID(targetMethodID);
         packet.setNextValueAsInt(1);
-        packet.setNextValueAsValue(new Value(true));
+        packet.setNextValueAsValue(Value.createBoolean(true));
         packet.setNextValueAsInt(0);
         logWriter.println(" Send ClassType.NewInstance (with Exception)");
         reply = debuggeeWrapper.vmMirror.performCommand(packet);
@@ -295,28 +275,7 @@ public class NewInstanceTest extends JDWPSyncTestCase {
                 JDWPConstants.TypeTag.getName(refTypeTag));
 
         // Get methodID
-        packet = new CommandPacket(
-                JDWPCommands.ReferenceTypeCommandSet.CommandSetID,
-                JDWPCommands.ReferenceTypeCommandSet.MethodsCommand);
-        packet.setNextValueAsClassID(typeID);
-        reply = debuggeeWrapper.vmMirror.performCommand(packet);
-        checkReplyPacket(reply, "ReferenceType::Methods command");
-
-        int declared = reply.getNextValueAsInt();
-        logWriter.println(" ReferenceType.Methods: declared=" + declared);
-        long targetMethodID = 0;
-        for (int i = 0; i < declared; i++) {
-            long methodID = reply.getNextValueAsMethodID();
-            String name = reply.getNextValueAsString();
-            String signature = reply.getNextValueAsString();
-            int modBits = reply.getNextValueAsInt();
-            logWriter.println("  methodID=" + methodID + "; name=" + name
-                    + ";  signature=" + signature + "; modBits=" + modBits);
-            if (name.equals("<init>")) {
-                targetMethodID = methodID;
-            }
-        }
-        assertAllDataRead(reply);
+        long targetMethodID = getMethodID(typeID, "<init>");
 
         // Set EventRequest
         packet = new CommandPacket(
