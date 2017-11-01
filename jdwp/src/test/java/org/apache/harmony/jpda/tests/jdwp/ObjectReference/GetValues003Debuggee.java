@@ -28,6 +28,8 @@ package org.apache.harmony.jpda.tests.jdwp.ObjectReference;
 import org.apache.harmony.jpda.tests.share.JPDADebuggeeSynchronizer;
 import org.apache.harmony.jpda.tests.share.SyncDebuggee;
 
+import java.util.Arrays;
+
 public class GetValues003Debuggee extends SyncDebuggee {
     
     static GetValues003Debuggee testedObject;
@@ -38,11 +40,12 @@ public class GetValues003Debuggee extends SyncDebuggee {
     String stringField; // JDWP_TAG_STRING = 115
     Thread threadField; // JDWP_TAG_THREAD = 116
     ThreadGroup threadGroupField; // JDWP_TAG_THREAD_GROUP = 103
-    Class classField; // JDWP_TAG_CLASS_OBJECT = 99
+    Class<?> classField; // JDWP_TAG_CLASS_OBJECT = 99
     ClassLoader classLoaderField; // DWP_TAG_CLASS_LOADER = 108
-    
-    
-    
+
+
+
+    @Override
     public void run() {
         logWriter.println("--> Debuggee: GetValues003Debuggee: START");
         testedObject = new GetValues003Debuggee();
@@ -68,8 +71,8 @@ public class GetValues003Debuggee extends SyncDebuggee {
         testedObject.classLoaderField = null;
 
         logWriter.println("\n--> Debuggee: GetValues003Debuggee: Before ObjectReference::GetValues command:");
-        logWriter.println("--> intArrayField value = " + testedObject.intArrayField);
-        logWriter.println("--> objectArrayField value = " + testedObject.objectArrayField);
+        logWriter.println("--> intArrayField value = " + Arrays.toString(testedObject.intArrayField));
+        logWriter.println("--> objectArrayField value = " + Arrays.toString(testedObject.objectArrayField));
         logWriter.println("--> objectField value = " + testedObject.objectField);
         logWriter.println("--> stringField value = " + testedObject.stringField);
         logWriter.println("--> threadField value = " + testedObject.threadField);

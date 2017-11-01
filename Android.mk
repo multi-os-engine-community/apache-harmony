@@ -13,11 +13,6 @@ harmony_test_dirs := \
     sql \
     support \
 
-# TODO: get these working too!
-#    crypto \
-#    security \
-#    x-net
-
 harmony_test_src_files := \
     $(call all-harmony-test-java-files-under,$(harmony_test_dirs),src/test/java) \
     $(call all-harmony-test-java-files-under,$(harmony_test_dirs),src/test/support/java) \

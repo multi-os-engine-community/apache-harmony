@@ -27,6 +27,7 @@ package org.apache.harmony.jpda.tests.jdwp.ArrayReference;
 
 import org.apache.harmony.jpda.tests.framework.jdwp.ArrayRegion;
 import org.apache.harmony.jpda.tests.framework.jdwp.CommandPacket;
+import org.apache.harmony.jpda.tests.framework.jdwp.Field;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPCommands;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPConstants;
 import org.apache.harmony.jpda.tests.framework.jdwp.ReplyPacket;
@@ -54,39 +55,31 @@ public class SetValuesTest extends JDWPArrayReferenceTestCase {
         long classID = getClassIDBySignature("Lorg/apache/harmony/jpda/tests/jdwp/ArrayReference/ArrayReferenceDebuggee;");
 
         // obtain fields
-        CommandPacket packet = new CommandPacket(
-                JDWPCommands.ReferenceTypeCommandSet.CommandSetID,
-                JDWPCommands.ReferenceTypeCommandSet.FieldsCommand);
-        packet.setNextValueAsReferenceTypeID(classID);
-        ReplyPacket reply = debuggeeWrapper.vmMirror.performCommand(packet);
-        checkReplyPacket(reply, "ReferenceType::Fields command");
+        Field[] fields = debuggeeWrapper.vmMirror.getFieldsInfo(classID);
 
-        int declared = reply.getNextValueAsInt();
-        for (int i = 0; i < declared; i++) {
-            long fieldID = reply.getNextValueAsFieldID();
-            String name = reply.getNextValueAsString();
-            reply.getNextValueAsString();
-            reply.getNextValueAsInt();
+        for (Field fieldInfo : fields) {
+            long fieldID = fieldInfo.getFieldID();
+            String name = fieldInfo.getName();
 
             if (name.equals("intArray")) {
                 ArrayRegion valuesRegion = new ArrayRegion(
                         JDWPConstants.Tag.INT_TAG, 10);
                 for (int j = 0; j < valuesRegion.getLength(); j++) {
-                    valuesRegion.setValue(j, new Value(-j));
+                    valuesRegion.setValue(j, Value.createInt(-j));
                 }
                 checkArrayValues(valuesRegion, classID, fieldID);
             } else if (name.equals("longArray")) {
                 ArrayRegion valuesRegion = new ArrayRegion(
                         JDWPConstants.Tag.LONG_TAG, 10);
                 for (int j = 0; j < valuesRegion.getLength(); j++) {
-                    valuesRegion.setValue(j, new Value((long)-j));
+                    valuesRegion.setValue(j, Value.createLong((long)-j));
                 }
                 checkArrayValues(valuesRegion, classID, fieldID);
             } else if (name.equals("byteArray")) {
                 ArrayRegion valuesRegion = new ArrayRegion(
                         JDWPConstants.Tag.BYTE_TAG, 10);
                 for (int j = 0; j < valuesRegion.getLength(); j++) {
-                    valuesRegion.setValue(j, new Value((byte)-j));
+                    valuesRegion.setValue(j, Value.createByte((byte)-j));
                 }
                 checkArrayValues(valuesRegion, classID, fieldID);
             }

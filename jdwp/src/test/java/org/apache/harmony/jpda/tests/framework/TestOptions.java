@@ -43,10 +43,14 @@ import java.util.HashMap;
  *   - name of Java executable to run debuggee on
  * <li><code>jpda.settings.debuggeeJavaPath</code>
  *   - full path to Java executable to run debuggee on
+ * <li><code>jdpa.settings.debuggeeAgentArgument</code>
+ *   - Command-line argument for agent native library. Defaults to "-agentlib:"
  * <li><code>jpda.settings.debuggeeAgentName</code>
  *   - name of agent native library
  * <li><code>jpda.settings.debuggeeAgentExtraOptions</code>
  *   - extra options for agent
+ * <li><code>jpda.settings.debuggeeClasspath</code>
+ *   - classpath to run debuggee with
  * <li><code>jpda.settings.debuggeeClassName</code>
  *   - full name of class to run debuggee with
  * <li><code>jpda.settings.debuggeeVMExtraOptions</code>
@@ -173,6 +177,15 @@ public class TestOptions {
     }
 
     /**
+     * Returns command line argument to use with name of JDWP agent library.
+     *
+     * @return option "jpda.settings.debuggeeAgentArgument" or "-agentlib:" by default
+     */
+    public String getDebuggeeAgentArgument() {
+        return getProperty("jpda.settings.debuggeeAgentArgument", "-agentlib:");
+    }
+
+    /**
      * Returns name of JDWP agent library.
      * 
      * @return option "jpda.settings.debuggeeAgentName" or "jdwp" by default
@@ -219,29 +232,13 @@ public class TestOptions {
     }
 
     /**
-     * Returns string with all options for agent including specified connection
-     * address (only for debugger in listening mode). It just calls
-     * <ul>
-     * <li><code>getDebuggeeAgentOptions(address, true)</code></li>
-     * </ul>
-     *  
-     * @deprecated This method is used as workaround for old tests and will be removed soon. 
-     *  
-     * @param address - address to attach
-     * 
-     * @return string with all agent options
-     */
-    public String getDebuggeeAgentOptions(String address) {
-        return getDebuggeeAgentOptions(address, true);
-    }
-    
-    /**
      * Returns VM classpath value to run debuggee with.
-     * 
-     * @return system property "java.class.path" by default.
+     *
+     * @return option "jpda.settings.debuggeeClasspath" or system property "java.class.path" by
+     * default.
      */
     public String getDebuggeeClassPath() {
-        return getProperty("java.class.path", null);
+        return getProperty("jpda.settings.debuggeeClasspath", getProperty("java.class.path", null));
     }
 
     /**
@@ -485,7 +482,7 @@ public class TestOptions {
      * @return string value of given property or default value if no such property found 
      */
     protected String getProperty(String name, String defaultValue) {
-        String value = (String)internalProperties.get(name);
+        String value = internalProperties.get(name);
         if (value != null) {
             return value;
         }

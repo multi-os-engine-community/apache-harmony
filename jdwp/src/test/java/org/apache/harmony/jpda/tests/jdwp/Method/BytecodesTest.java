@@ -25,11 +25,11 @@
  */
 package org.apache.harmony.jpda.tests.jdwp.Method;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
 import org.apache.harmony.jpda.tests.framework.jdwp.CommandPacket;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPCommands;
+import org.apache.harmony.jpda.tests.framework.jdwp.Method;
 import org.apache.harmony.jpda.tests.framework.jdwp.ReplyPacket;
 import org.apache.harmony.jpda.tests.share.JPDADebuggeeSynchronizer;
 
@@ -44,14 +44,14 @@ public class BytecodesTest extends JDWPMethodTestCase {
      * <BR>It runs MethodDebuggee. Gets methods with ReferenceType.Methods command,
      * prints it's bytecodes received with Method.Bytecodes command.
      */
-    public void testBytecodesTest001() throws UnsupportedEncodingException {
+    public void testBytecodesTest001() {
         logWriter.println("testBytecodesTest001 started");
 
         synchronizer.receiveMessage(JPDADebuggeeSynchronizer.SGNL_READY);
 
         long classID = getClassIDBySignature("L"+getDebuggeeClassName().replace('.', '/')+";");
 
-        MethodInfo[] methodsInfo = jdwpGetMethodsInfo(classID);
+        Method[] methodsInfo = debuggeeWrapper.vmMirror.getMethods(classID);
         assertFalse("Invalid number of methods", methodsInfo.length == 0);
 
         for (int i = 0; i < methodsInfo.length; i++) {

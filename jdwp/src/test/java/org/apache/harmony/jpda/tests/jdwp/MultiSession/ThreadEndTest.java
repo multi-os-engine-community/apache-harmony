@@ -28,12 +28,9 @@ package org.apache.harmony.jpda.tests.jdwp.MultiSession;
 import org.apache.harmony.jpda.tests.framework.TestOptions;
 import org.apache.harmony.jpda.tests.framework.TestErrorException;
 import org.apache.harmony.jpda.tests.framework.jdwp.CommandPacket;
-import org.apache.harmony.jpda.tests.framework.jdwp.Event;
-import org.apache.harmony.jpda.tests.framework.jdwp.EventMod;
 import org.apache.harmony.jpda.tests.framework.jdwp.JDWPConstants;
 import org.apache.harmony.jpda.tests.framework.jdwp.ParsedEvent;
 import org.apache.harmony.jpda.tests.framework.jdwp.ReplyPacket;
-import org.apache.harmony.jpda.tests.jdwp.share.JDWPUnitDebuggeeWrapper;
 import org.apache.harmony.jpda.tests.share.JPDADebuggeeSynchronizer;
 
 
@@ -54,13 +51,8 @@ public class ThreadEndTest extends JDWPEventTestCase {
         synchronizer.receiveMessage(JPDADebuggeeSynchronizer.SGNL_READY);
 
         logWriter.println("=> set ThreadEndEvent...");
-        ReplyPacket reply;
-        byte eventKind = JDWPConstants.EventKind.THREAD_END;
-        byte suspendPolicy = JDWPConstants.SuspendPolicy.NONE;
-        EventMod[] mods = new EventMod[0];
-        Event eventToSet = new Event(eventKind, suspendPolicy, mods);
-
-        reply = debuggeeWrapper.vmMirror.setEvent(eventToSet);
+        ReplyPacket reply =
+                debuggeeWrapper.vmMirror.setThreadEnd(JDWPConstants.SuspendPolicy.NONE);
         checkReplyPacket(reply, "Set THREAD_END event");
 
         logWriter.println("=> set ThreadEndEvent - DONE");
@@ -121,6 +113,7 @@ public class ThreadEndTest extends JDWPEventTestCase {
         }
     }
 
+    @Override
     protected void beforeConnectionSetUp() {
         settings.setAttachConnectorKind();
         if (settings.getTransportAddress() == null) {

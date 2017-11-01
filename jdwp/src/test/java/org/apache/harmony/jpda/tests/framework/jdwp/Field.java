@@ -40,20 +40,11 @@ public final class Field {
 
     private String signature;
 
+    private String genericSignature;
+
     private int modBits;
 
     private byte tag;
-
-    /**
-     * Default constructor.
-     */
-    public Field() {
-        id = -1;
-        classID = -1;
-        name = "unknown";
-        signature = "unknown";
-        modBits = -1;
-    }
 
     /**
      * Constructor initializing all members of the Field instance.
@@ -69,12 +60,13 @@ public final class Field {
      * @param modBits
      *            field modifiers
      */
-    public Field(long id, long classID, String name, String signature,
+    public Field(long id, long classID, String name, String signature, String genericSignature,
             int modBits) {
         this.id = id;
         this.classID = classID;
         this.name = name;
         this.modBits = modBits;
+        this.genericSignature = genericSignature;
         setSignature(signature);
     }
 
@@ -144,7 +136,7 @@ public final class Field {
      * 
      * @return long
      */
-    public long getID() {
+    public long getFieldID() {
         return this.id;
     }
 
@@ -173,6 +165,15 @@ public final class Field {
      */
     public String getSignature() {
         return signature;
+    }
+
+    /**
+     * Gets generic signature of field type.
+     *
+     * @return the genericSignature
+     */
+    public String getGenericSignature() {
+        return genericSignature;
     }
 
     /**
@@ -280,6 +281,7 @@ public final class Field {
      * @see java.lang.Object#equals(java.lang.Object)
      * @return boolean
      */
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Field)) {
             return false;
@@ -302,6 +304,7 @@ public final class Field {
      * @see java.lang.Object#toString()
      * @return String
      */
+    @Override
     public String toString() {
         String str = "Field: id=" + id + ", classID=" + classID + ", name='"
                 + name + "', signature='" + signature + "', modBits=";
