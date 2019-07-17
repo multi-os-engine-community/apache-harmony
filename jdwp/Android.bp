@@ -9,6 +9,12 @@ java_genrule {
 
 java_test {
     name: "apache-harmony-jdwp-tests",
+    visibility: [
+        "//cts/tests/jdwp",
+        // The preload2 tool in framework uses the JDWP tests from Apache Harmony, for
+        // convenience (and to not depend on internal JDK APIs).
+        "//frameworks/base/tools/preload2",
+    ],
     hostdex: true,
     host_supported: true,
     srcs: ["src/test/java/**/*.java"],
@@ -16,7 +22,7 @@ java_test {
 
     libs: ["junit"],
 
-    no_standard_libs: true,
+    sdk_version: "none",
     system_modules: "core-all-system-modules",
     target: {
         // Only depend on core-all for the Android variant so we can avoid
@@ -35,9 +41,4 @@ java_test {
     },
 
     jarjar_rules: "jarjar-rules.txt",
-}
-
-java_library_host {
-    name: "apache-harmony-jdwp-tests-host",
-    static_libs: ["apache-harmony-jdwp-tests"],
 }
